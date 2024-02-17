@@ -3,8 +3,6 @@ import { setCookie } from "cookies-next";
 import jwt from "jsonwebtoken";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { CmuOAuthBasicInfo } from "../../types/CmuOAuthBasicInfo";
-import { cookies } from "next/headers";
-
 
 type SuccessResponse = {
   ok: true;
@@ -43,7 +41,6 @@ async function getOAuthAccessTokenAsync(
   }
 }
 
-
 async function getCMUBasicInfoAsync(accessToken: string) {
   try {
     const response = await axios.get(
@@ -75,15 +72,16 @@ export default async function handler(
   //get access token
   const accessToken = await getOAuthAccessTokenAsync(authorizationCode);
   if (!accessToken)
-    return Response.json({
-    ok: false,
-    message: "Cannot get OAuth access token",
-  });
+    return res
+      .status(400)
+      .json({ ok: false, message: "Cannot get OAuth access token" });
 
   //get basic info
   const cmuBasicInfo = await getCMUBasicInfoAsync(accessToken);
-  if (cmuBasicInfo === null)
-    return Response.json({ ok: false, message: "Cannot get cmu basic info" });
+  if (!cmuBasicInfo)
+    return res
+      .status(400)
+      .json({ ok: false, message: "Cannot get cmu basic info" });
 
   //Code related to CMU OAuth ends here.
   //The rest code is just an example of how you can use CMU basic info to create session
@@ -92,7 +90,6 @@ export default async function handler(
   //Now we will use acquired baic info (student name, student id, ...) to create session
   //There are many authentication methods such as token or cookie session or you can use any authentication library.
   //The example will use JsonWebToken (JWT)
-
 
   if (typeof process.env.JWT_SECRET !== "string")
     throw "Please assign jwt secret in .env!";
@@ -103,17 +100,10 @@ export default async function handler(
       firstName: cmuBasicInfo.firstname_EN,
       lastName: cmuBasicInfo.lastname_EN,
       studentId: cmuBasicInfo.student_id, //Note that not everyone has this. Teachers and CMU Staffs don't have student id!
-      itaccounttype_id: cmuBasicInfo.itaccounttype_id,
-      itaccounttype_EN: cmuBasicInfo.itaccounttype_EN,
-      organization_code: cmuBasicInfo.organization_code,
-      organization_name_EN: cmuBasicInfo.organization_name_EN,
-      // role_name: cmuBasicInfo.role_name,
-      // MAJOR_NAME_TH: cmuBasicInfo.MAJOR_NAME_TH,
-
     },
     process.env.JWT_SECRET,
     {
-      expiresIn: "24h", // Token will last for one hour only
+      expiresIn: "1h", // Token will last for one hour only
     }
   );
 
