@@ -9,6 +9,12 @@ type SuccessResponse = {
   firstName: string;
   lastName: string;
   studentId?: string;
+  itaccounttype_id: string;
+  itaccounttype_EN: string;
+  organization_code: string;
+  organization_name_EN: string;
+  // role_name: string;
+  // MAJOR_NAME_TH: string;
 };
 
 type ErrorResponse = {
@@ -42,6 +48,12 @@ export default async function handler(
       firstName: decoded.firstName,
       lastName: decoded.lastName,
       studentId: decoded.studentId,
+      itaccounttype_id: decoded.itaccounttype_id,
+      itaccounttype_EN: decoded.itaccounttype_EN,
+      organization_code: decoded.organization_code,
+      organization_name_EN: decoded.organization_name_EN,
+      // role_name: decoded.role_name,
+      // MAJOR_NAME_TH: decoded.MAJOR_NAME_TH,
     });
   } catch (error) {
     return res.status(401).json({ ok: false, message: "Invalid token" });
